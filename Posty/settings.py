@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'postsapp',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_swagger',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

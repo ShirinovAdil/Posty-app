@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
+from rest_framework.decorators import api_view
 
 from postsapp.models import Comment
 from postsapp.serializers import *
@@ -101,4 +102,14 @@ class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
 
+
+@api_view(['POST'])
+def upvote_view(request, pk):
+    try:
+        post = Post.objects.get(pk=pk)
+        post.rating += 1
+        post.save()
+        return Response({"Success": True}, status=status.HTTP_200_OK)
+    except Exception:
+        return Response({"Success": False}, status=status.HTTP_400_BAD_REQUEST)
 
