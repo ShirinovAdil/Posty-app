@@ -1,5 +1,13 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+
+
+class User(AbstractUser):
+    """
+    Custom User model to add extra fields
+    """
+    birthdate = models.DateField(null=True, blank=True)
+    avatar = models.ImageField(blank=True, null=True)
 
 
 class Post(models.Model):
@@ -24,3 +32,4 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.author} commented: {self.content[:50]}..."
+

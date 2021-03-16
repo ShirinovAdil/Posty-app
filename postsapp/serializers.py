@@ -21,3 +21,10 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'content', 'rating', 'date', 'author', 'comments']
 
 
+class UserSerializer(serializers.ModelSerializer):
+    """
+    A representation of a user
+    """
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'username', 'email', 'birthdate', 'avatar']

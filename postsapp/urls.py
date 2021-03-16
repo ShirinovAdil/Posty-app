@@ -3,7 +3,8 @@ from rest_framework import routers
 from postsapp import views
 
 router = routers.DefaultRouter()
-router.register(r'posts', views.PostViewSet)
+router.register(r'commentsViewSet', views.CommentsViewSet)
+#router.register(r'posts', views.PostViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -13,5 +14,8 @@ urlpatterns = [
     path('posts/', views.PostsListView.as_view()),
     path('posts/<int:pk>', views.PostDetailView.as_view()),
     path('posts/<int:pk>/upvote/', views.upvote_view),
+
+
+    path('profile/', views.UserApiView.as_view()),
 
 ]

@@ -8,17 +8,15 @@ from rest_framework.decorators import api_view
 
 from postsapp.models import Comment
 from postsapp.serializers import *
+import postsapp.permissions as custom_permissions
 
 from django.http import Http404
+from rest_framework.filters import SearchFilter
 
 
-class PostViewSet(viewsets.ModelViewSet):
-    """
-    Easier way to provide basic functionality
-    """
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class CommentsViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -93,6 +91,23 @@ class PostsListView(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
 
+    def get_queryset(self):
+        queryset = Post.objects.all()
+        title = self.request.query_params.get('title', None)
+        if title:
+            queryset = queryset.filter(title__contains=title)
+        return queryset
+
+    def post(self, request):
+        """
+        Create a new post
+        """
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(author=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -100,7 +115,7 @@ class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [custom_permissions.IsAuthorOrReadOnly]
 
 
 @api_view(['POST'])
@@ -112,4 +127,16 @@ def upvote_view(request, pk):
         return Response({"Success": True}, status=status.HTTP_200_OK)
     except Exception:
         return Response({"Success": False}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserApiView(APIView):
+
+    def get(self, request):
+        user = request.user
+        if user:
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
