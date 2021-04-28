@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
@@ -11,19 +12,22 @@ from postsapp.serializers import *
 import postsapp.permissions as custom_permissions
 
 from django.http import Http404
-from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 
-class CommentsViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+# class CommentsViewSet(viewsets.ModelViewSet):
+#     queryset = Comment.objects.all()
+#     serializer_class = CommentSerializer
+#
+#     def perform_create(self, serializer):
+#         serializer.save(author=self.request.user)
+
+
+class CommentGenericApiView(GenericAPIView):
+    """ Works with swagger """
+
     serializer_class = CommentSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
-
-class CommentApiView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    queryset = Comment.objects.all()
 
     def get(self, request):
         """
@@ -37,17 +41,30 @@ class CommentApiView(APIView):
         """
         Create a new comment to specific POST
         """
-        serializer = CommentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(author=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        comment = CommentSerializer(data=request.data)
+        if comment.is_valid():
+            comment.save(author=request.user)
+            return Response(comment.data, status=status.HTTP_201_CREATED)
+        return Response(comment.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        instance = serializer.save(author=self.request.user)
+
 
 class CommentDetailApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_object(self, pk):
+    # def get_object(self, pk):
+    #     try:
+    #         return Comment.objects.get(pk=pk)
+    #     except Comment.DoesNotExist:
+    #         raise Http404
+
+    @staticmethod
+    def get_object(pk):
         try:
             return Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
@@ -90,6 +107,9 @@ class PostsListView(generics.ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['title', 'rating']
+
 
     def get_queryset(self):
         queryset = Post.objects.all()
