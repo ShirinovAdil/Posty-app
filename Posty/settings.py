@@ -142,3 +142,4 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'postsapp.User'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

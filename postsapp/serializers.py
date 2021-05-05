@@ -32,7 +32,15 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         list_serializer_class = FilterReplySerializer
         model = Comment
-        fields = ['id', 'content', 'author', 'post', 'replies']
+        fields = ['id', 'content', 'author', 'post', 'parent', 'replies']
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=False)
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
 
 
 class PostSerializer(serializers.ModelSerializer):

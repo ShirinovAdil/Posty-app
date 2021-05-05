@@ -41,7 +41,7 @@ class CommentGenericApiView(GenericAPIView):
         """
         Create a new comment to specific POST
         """
-        comment = CommentSerializer(data=request.data)
+        comment = CommentCreateSerializer(data=request.data)
         if comment.is_valid():
             comment.save(author=request.user)
             return Response(comment.data, status=status.HTTP_201_CREATED)
